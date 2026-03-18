@@ -1,0 +1,43 @@
+/* frontend/src/app/globals.css */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #f4f6fa;
+  --white: #ffffff;
+  --surface: #f9fafc;
+  --border: #e4e8f0;
+  --text: #0f1623;
+  --text2: #3d4761;
+  --muted: #8892b0;
+  --accent: #1a3faa;
+  --accent-lt: #e8eeff;
+  --red: #e63946;
+  --red-lt: #fff0f1;
+  --green: #0a8754;
+  --green-lt: #e8f7f0;
+  --orange: #e07b00;
+  --orange-lt: #fff4e0;
+  --purple: #6d28d9;
+  --purple-lt: #f0ebff;
+  --teal: #0891b2;
+  --teal-lt: #e0f5fa;
+  --pink: #db2777;
+  --pink-lt: #fce7f3;
+  --shadow: 0 2px 12px rgba(15,22,35,0.07);
+  --shadow-md: 0 6px 24px rgba(15,22,35,0.10);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
