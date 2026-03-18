@@ -47,18 +47,13 @@ const SITE_CONFIG = {
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://fallback.com",
 };
 
-// ---- Safe fetch (ULTIMATE SAFE)
+// ---- Safe fetch (FIXED)
 async function safeFetch<T>(fn: () => Promise<any>, name: string): Promise<T | null> {
   try {
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Timeout")), 8000)
-    );
-
-    const res = await Promise.race([fn(), timeout]);
+    const res = await fn();
 
     if (!res) return null;
 
-    // Handle multiple API shapes
     if (Array.isArray(res)) return res as T;
     if (res?.data && Array.isArray(res.data)) return res.data as T;
     if (res?.summary && Array.isArray(res.summary)) return res.summary as T;
@@ -70,26 +65,21 @@ async function safeFetch<T>(fn: () => Promise<any>, name: string): Promise<T | n
   }
 }
 
-// ---- Fetch Data
+// ---- Fetch Data (FIXED)
 async function getData(): Promise<DashboardData> {
   const errors: string[] = [];
 
-  const resultsArr = await Promise.allSettled([
+  const [jobs, results, summary, ticker] = await Promise.all([
     safeFetch<Job[]>(() => fetchJobs({ category: "job", limit: 10 }), "jobs"),
     safeFetch<Job[]>(() => fetchJobs({ category: "result", limit: 10 }), "results"),
     safeFetch<SummaryItem[]>(() => fetchSummary(), "summary"),
     safeFetch<TickerItem[]>(() => fetchTicker(), "ticker"),
   ]);
 
-  const jobs = resultsArr[0].status === "fulfilled" ? resultsArr[0].value : null;
-  const results = resultsArr[1].status === "fulfilled" ? resultsArr[1].value : null;
-  const summary = resultsArr[2].status === "fulfilled" ? resultsArr[2].value : null;
-  const ticker = resultsArr[3].status === "fulfilled" ? resultsArr[3].value : null;
-
-  if (jobs === null) errors.push("jobs");
-  if (results === null) errors.push("results");
-  if (summary === null) errors.push("summary");
-  if (ticker === null) errors.push("ticker");
+  if (!jobs) errors.push("jobs");
+  if (!results) errors.push("results");
+  if (!summary) errors.push("summary");
+  if (!ticker) errors.push("ticker");
 
   const hasData =
     (jobs?.length ?? 0) > 0 ||
@@ -187,7 +177,8 @@ export default async function HomePage() {
 
   return (
     <div style={{ background: "#f4f6fa", minHeight: "100vh" }}>
-      {data.ticker.length > 0 && <Ticker initialData={data.ticker} />}
+      {/* ✅ FIX: correct prop */}
+      <Ticker data={data.ticker} />
 
       <header style={{
         background: "#fff",
@@ -224,7 +215,7 @@ export default async function HomePage() {
         </main>
 
         <aside style={{ position: "sticky", top: 80 }}>
-          <Sidebar summary={data.summary} highlights={data.jobs?.slice(0, 5) || []} />
+          <Sidebar summary={data.summary} highlights={data.jobs.slice(0, 5)} />
         </aside>
       </div>
     </div>
@@ -236,19 +227,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
   title: "SarkariXpress - Latest Govt Jobs & Results",
   description: "Latest government jobs, results and admit cards",
-  alternates: { canonical: "/" },
-  openGraph: {
-    title: "SarkariXpress",
-    description: "Latest Govt Jobs",
-    url: SITE_CONFIG.url,
-    siteName: "SarkariXpress",
-    images: [`${SITE_CONFIG.url}/og-image.jpg`],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    images: [`${SITE_CONFIG.url}/og-image.jpg`],
-  },
 };
 
 // ---- Viewport
@@ -257,7 +235,6 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-// ---- ISR
-export const revalidate = 300;
-export const dynamic = "force-static";
-export const fetchCache = "force-cache";
+// ---- FINAL FIX (MOST IMPORTANT)
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
