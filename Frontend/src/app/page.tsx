@@ -187,7 +187,7 @@ export default async function HomePage() {
 
   return (
     <div style={{ background: "#f4f6fa", minHeight: "100vh" }}>
-      {data.ticker.length > 0 && <Ticker data={data.ticker} />}
+      {data.ticker.length > 0 && <Ticker initialData={data.ticker} />}
 
       <header style={{
         background: "#fff",
